@@ -14,6 +14,9 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedNewProcurementRouteImport } from './routes/_authenticated/new-procurement'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedStandardsIndexRouteImport } from './routes/_authenticated/standards.index'
+import { Route as AuthenticatedStandardsIdRouteImport } from './routes/_authenticated/standards.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,18 +43,41 @@ const AuthenticatedNewProcurementRoute =
     path: '/new-procurement',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStandardsIndexRoute =
+  AuthenticatedStandardsIndexRouteImport.update({
+    id: '/standards/',
+    path: '/standards/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedStandardsIdRoute =
+  AuthenticatedStandardsIdRouteImport.update({
+    id: '/standards/$id',
+    path: '/standards/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/new-procurement': typeof AuthenticatedNewProcurementRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/standards/$id': typeof AuthenticatedStandardsIdRoute
+  '/standards/': typeof AuthenticatedStandardsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/new-procurement': typeof AuthenticatedNewProcurementRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/standards/$id': typeof AuthenticatedStandardsIdRoute
+  '/standards': typeof AuthenticatedStandardsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -60,12 +86,29 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/new-procurement': typeof AuthenticatedNewProcurementRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/standards/$id': typeof AuthenticatedStandardsIdRoute
+  '/_authenticated/standards/': typeof AuthenticatedStandardsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/history' | '/new-procurement'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/history'
+    | '/new-procurement'
+    | '/settings'
+    | '/standards/$id'
+    | '/standards/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/history' | '/new-procurement'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/history'
+    | '/new-procurement'
+    | '/settings'
+    | '/standards/$id'
+    | '/standards'
   id:
     | '__root__'
     | '/'
@@ -73,6 +116,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/history'
     | '/_authenticated/new-procurement'
+    | '/_authenticated/settings'
+    | '/_authenticated/standards/$id'
+    | '/_authenticated/standards/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,6 +163,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNewProcurementRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/standards/': {
+      id: '/_authenticated/standards/'
+      path: '/standards'
+      fullPath: '/standards/'
+      preLoaderRoute: typeof AuthenticatedStandardsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/standards/$id': {
+      id: '/_authenticated/standards/$id'
+      path: '/standards/$id'
+      fullPath: '/standards/$id'
+      preLoaderRoute: typeof AuthenticatedStandardsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -124,12 +191,18 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedNewProcurementRoute: typeof AuthenticatedNewProcurementRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedStandardsIdRoute: typeof AuthenticatedStandardsIdRoute
+  AuthenticatedStandardsIndexRoute: typeof AuthenticatedStandardsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedNewProcurementRoute: AuthenticatedNewProcurementRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedStandardsIdRoute: AuthenticatedStandardsIdRoute,
+  AuthenticatedStandardsIndexRoute: AuthenticatedStandardsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
