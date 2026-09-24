@@ -14,7 +14,9 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedNewProcurementRouteImport } from './routes/_authenticated/new-procurement'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedProcurementIdRouteImport } from './routes/_authenticated/procurement.$id'
 import { Route as AuthenticatedStandardsIndexRouteImport } from './routes/_authenticated/standards.index'
 import { Route as AuthenticatedStandardsIdRouteImport } from './routes/_authenticated/standards.$id'
 
@@ -43,11 +45,22 @@ const AuthenticatedNewProcurementRoute =
     path: '/new-procurement',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProcurementIdRoute =
+  AuthenticatedProcurementIdRouteImport.update({
+    id: '/procurement/$id',
+    path: '/procurement/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedStandardsIndexRoute =
   AuthenticatedStandardsIndexRouteImport.update({
     id: '/standards/',
@@ -66,7 +79,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/new-procurement': typeof AuthenticatedNewProcurementRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/procurement/$id': typeof AuthenticatedProcurementIdRoute
   '/standards/$id': typeof AuthenticatedStandardsIdRoute
   '/standards/': typeof AuthenticatedStandardsIndexRoute
 }
@@ -75,7 +90,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/new-procurement': typeof AuthenticatedNewProcurementRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/procurement/$id': typeof AuthenticatedProcurementIdRoute
   '/standards/$id': typeof AuthenticatedStandardsIdRoute
   '/standards': typeof AuthenticatedStandardsIndexRoute
 }
@@ -86,7 +103,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/new-procurement': typeof AuthenticatedNewProcurementRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/procurement/$id': typeof AuthenticatedProcurementIdRoute
   '/_authenticated/standards/$id': typeof AuthenticatedStandardsIdRoute
   '/_authenticated/standards/': typeof AuthenticatedStandardsIndexRoute
 }
@@ -97,7 +116,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/new-procurement'
+    | '/reports'
     | '/settings'
+    | '/procurement/$id'
     | '/standards/$id'
     | '/standards/'
   fileRoutesByTo: FileRoutesByTo
@@ -106,7 +127,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/new-procurement'
+    | '/reports'
     | '/settings'
+    | '/procurement/$id'
     | '/standards/$id'
     | '/standards'
   id:
@@ -116,7 +139,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/history'
     | '/_authenticated/new-procurement'
+    | '/_authenticated/reports'
     | '/_authenticated/settings'
+    | '/_authenticated/procurement/$id'
     | '/_authenticated/standards/$id'
     | '/_authenticated/standards/'
   fileRoutesById: FileRoutesById
@@ -163,11 +188,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNewProcurementRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/procurement/$id': {
+      id: '/_authenticated/procurement/$id'
+      path: '/procurement/$id'
+      fullPath: '/procurement/$id'
+      preLoaderRoute: typeof AuthenticatedProcurementIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/standards/': {
@@ -191,7 +230,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedNewProcurementRoute: typeof AuthenticatedNewProcurementRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedProcurementIdRoute: typeof AuthenticatedProcurementIdRoute
   AuthenticatedStandardsIdRoute: typeof AuthenticatedStandardsIdRoute
   AuthenticatedStandardsIndexRoute: typeof AuthenticatedStandardsIndexRoute
 }
@@ -200,7 +241,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedNewProcurementRoute: AuthenticatedNewProcurementRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedProcurementIdRoute: AuthenticatedProcurementIdRoute,
   AuthenticatedStandardsIdRoute: AuthenticatedStandardsIdRoute,
   AuthenticatedStandardsIndexRoute: AuthenticatedStandardsIndexRoute,
 }
