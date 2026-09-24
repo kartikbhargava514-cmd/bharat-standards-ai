@@ -14,7 +14,198 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      procurements: {
+        Row: {
+          alerts: Json | null
+          application: string | null
+          category: string | null
+          created_at: string
+          description: string
+          id: string
+          language: string | null
+          quantity: string | null
+          status: string
+          structured_requirements: Json | null
+          summary: string | null
+          title: string
+          unit: string | null
+          user_id: string
+        }
+        Insert: {
+          alerts?: Json | null
+          application?: string | null
+          category?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          language?: string | null
+          quantity?: string | null
+          status?: string
+          structured_requirements?: Json | null
+          summary?: string | null
+          title: string
+          unit?: string | null
+          user_id: string
+        }
+        Update: {
+          alerts?: Json | null
+          application?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          language?: string | null
+          quantity?: string | null
+          status?: string
+          structured_requirements?: Json | null
+          summary?: string | null
+          title?: string
+          unit?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          department: string | null
+          designation: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          designation?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          designation?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      recommendations: {
+        Row: {
+          category: string
+          created_at: string
+          evidence: string | null
+          id: string
+          is_number: string
+          procurement_id: string
+          reason: string | null
+          relevance: number
+          standard_id: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          evidence?: string | null
+          id?: string
+          is_number: string
+          procurement_id: string
+          reason?: string | null
+          relevance?: number
+          standard_id?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          evidence?: string | null
+          id?: string
+          is_number?: string
+          procurement_id?: string
+          reason?: string | null
+          relevance?: number
+          standard_id?: string | null
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendations_procurement_id_fkey"
+            columns: ["procurement_id"]
+            isOneToOne: false
+            referencedRelation: "procurements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recommendations_standard_id_fkey"
+            columns: ["standard_id"]
+            isOneToOne: false
+            referencedRelation: "standards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      standards: {
+        Row: {
+          applicable_for: string | null
+          category: string
+          certification: string | null
+          created_at: string
+          id: string
+          is_number: string
+          key_parameters: string[]
+          keywords: string[]
+          latest_amendment: string | null
+          related_standards: string[]
+          scope: string
+          source_url: string | null
+          standard_type: string
+          status: string
+          title: string
+          year: number | null
+        }
+        Insert: {
+          applicable_for?: string | null
+          category: string
+          certification?: string | null
+          created_at?: string
+          id?: string
+          is_number: string
+          key_parameters?: string[]
+          keywords?: string[]
+          latest_amendment?: string | null
+          related_standards?: string[]
+          scope: string
+          source_url?: string | null
+          standard_type?: string
+          status?: string
+          title: string
+          year?: number | null
+        }
+        Update: {
+          applicable_for?: string | null
+          category?: string
+          certification?: string | null
+          created_at?: string
+          id?: string
+          is_number?: string
+          key_parameters?: string[]
+          keywords?: string[]
+          latest_amendment?: string | null
+          related_standards?: string[]
+          scope?: string
+          source_url?: string | null
+          standard_type?: string
+          status?: string
+          title?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
