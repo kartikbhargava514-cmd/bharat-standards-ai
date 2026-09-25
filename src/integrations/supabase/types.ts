@@ -22,8 +22,11 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          input_mode: string
           language: string | null
           quantity: string | null
+          review_note: string | null
+          reviewed_at: string | null
           status: string
           structured_requirements: Json | null
           summary: string | null
@@ -38,8 +41,11 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          input_mode?: string
           language?: string | null
           quantity?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
           status?: string
           structured_requirements?: Json | null
           summary?: string | null
@@ -54,8 +60,11 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          input_mode?: string
           language?: string | null
           quantity?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
           status?: string
           structured_requirements?: Json | null
           summary?: string | null
