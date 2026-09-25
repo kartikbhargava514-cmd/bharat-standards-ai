@@ -1,0 +1,1 @@
+ALTER TABLE public.procurements ADD COLUMN IF NOT EXISTS review_note text, ADD COLUMN IF NOT EXISTS input_mode text NOT NULL DEFAULT 'manual', ADD COLUMN IF NOT EXISTS reviewed_at timestamptz;
