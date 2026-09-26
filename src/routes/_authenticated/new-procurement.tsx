@@ -42,11 +42,10 @@ export const Route = createFileRoute("/_authenticated/new-procurement")({
       },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>): { mode?: Mode } => ({
-    mode: ["manual", "file", "voice", "camera"].includes(s.mode as string)
-      ? (s.mode as Mode)
-      : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { mode?: Mode } =>
+    ["manual", "file", "voice", "camera"].includes(s["mode"] as string)
+      ? { mode: s["mode"] as Mode }
+      : {},
   component: NewProcurement,
 });
 
