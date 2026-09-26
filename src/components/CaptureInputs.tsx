@@ -167,7 +167,10 @@ export function CameraCapture({ onExtract }: { onExtract: (text: string) => void
 
   async function fromFile(file: File | null) {
     if (!file) return;
-    if (!file.type.startsWith("image/")) return toast.error("Please choose an image.");
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image.");
+      return;
+    }
     const img = new Image();
     img.src = URL.createObjectURL(file);
     await img.decode();
