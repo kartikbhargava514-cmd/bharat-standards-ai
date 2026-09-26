@@ -42,10 +42,10 @@ export const Route = createFileRoute("/_authenticated/new-procurement")({
       },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    mode: (["manual", "file", "voice", "camera"].includes(s.mode as string)
-      ? s.mode
-      : "manual") as Mode,
+  validateSearch: (s: Record<string, unknown>): { mode?: Mode } => ({
+    mode: ["manual", "file", "voice", "camera"].includes(s.mode as string)
+      ? (s.mode as Mode)
+      : undefined,
   }),
   component: NewProcurement,
 });
@@ -88,7 +88,7 @@ const languages = [
 
 function NewProcurement() {
   const navigate = useNavigate();
-  const { mode } = Route.useSearch();
+  const mode: Mode = Route.useSearch().mode ?? "manual";
   const [missing, setMissing] = useState<string[] | null>(null);
   const [form, setForm] = useState({
     title: "",
