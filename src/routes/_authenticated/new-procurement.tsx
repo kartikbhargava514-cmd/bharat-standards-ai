@@ -1,6 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Loader2, Sparkles, Upload } from "lucide-react";
+import { Loader2, Sparkles, Upload, PenLine, FileUp, Mic, Camera } from "lucide-react";
+import { VoiceRecorder, CameraCapture } from "@/components/CaptureInputs";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -33,8 +42,20 @@ export const Route = createFileRoute("/_authenticated/new-procurement")({
       },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { mode?: Mode } =>
+    ["manual", "file", "voice", "camera"].includes(s["mode"] as string)
+      ? { mode: s["mode"] as Mode }
+      : {},
   component: NewProcurement,
 });
+
+type Mode = "manual" | "file" | "voice" | "camera";
+const modes: { mode: Mode; label: string; icon: typeof PenLine }[] = [
+  { mode: "manual", label: "Manual Form", icon: PenLine },
+  { mode: "file", label: "Text File", icon: FileUp },
+  { mode: "voice", label: "Voice", icon: Mic },
+  { mode: "camera", label: "Camera", icon: Camera },
+];
 
 const schema = z.object({
   title: z.string().trim().min(3, "Enter a procurement title").max(160),
@@ -66,6 +87,8 @@ const languages = [
 
 function NewProcurement() {
   const navigate = useNavigate();
+  const mode: Mode = Route.useSearch().mode ?? "manual";
+  const [missing, setMissing] = useState<string[] | null>(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -100,9 +123,36 @@ function NewProcurement() {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function appendText(text: string, label: string) {
+    setForm((f) => ({
+      ...f,
+      description: `${f.description}\n\n--- ${label} ---\n${text}`.trim().slice(0, 6000),
+      title: f.title || text.split(/[.\n]/)[0]!.slice(0, 80),
+    }));
+  }
+
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const parsed = schema.safeParse(form);
+    const gaps: string[] = [];
+    if (form.title.trim().length < 3) gaps.push("Procurement title");
+    if (form.description.trim().length < 40) gaps.push("Detailed description / specification");
+    if (!form.quantity.trim()) gaps.push("Quantity");
+    if (form.application === "Other") gaps.push("Specific use / application");
+    if (gaps.length) {
+      setMissing(gaps);
+      return;
+    }
+    void save("In Progress");
+  }
+
+  async function save(status: "In Progress" | "Withdrawn" | "Rejected") {
+    setMissing(null);
+    const parsed = schema.safeParse({
+      ...form,
+      title: form.title.trim().length >= 3 ? form.title : "Untitled procurement",
+      description:
+        status === "In Progress" ? form.description : form.description.padEnd(15, " ").trim() || "Specification not provided",
+    });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Please check the form.");
       return;
@@ -113,11 +163,22 @@ function NewProcurement() {
       if (!auth.user) throw new Error("Please sign in again.");
       const { data, error } = await supabase
         .from("procurements")
-        .insert({ ...parsed.data, user_id: auth.user.id })
+        .insert({
+          ...parsed.data,
+          user_id: auth.user.id,
+          input_mode: mode,
+          status,
+          review_note: status === "In Progress" ? null : "Missing specification details",
+          reviewed_at: status === "In Progress" ? null : new Date().toISOString(),
+        })
         .select("id")
         .single();
       if (error) throw error;
-      navigate({ to: "/procurement/$id", params: { id: data.id } });
+      if (status === "In Progress") navigate({ to: "/procurement/$id", params: { id: data.id } });
+      else {
+        toast.success(`Procurement ${status.toLowerCase()}.`);
+        navigate({ to: "/history" });
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not save the procurement.");
       setSubmitting(false);
@@ -131,6 +192,41 @@ function NewProcurement() {
         Provide details about your product or service and let AI recommend the relevant Indian
         Standards.
       </p>
+
+      <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {modes.map(({ mode: m, label, icon: Icon }) => (
+          <Button
+            key={m}
+            type="button"
+            variant={mode === m ? "default" : "outline"}
+            onClick={() => navigate({ to: "/new-procurement", search: { mode: m } })}
+          >
+            <Icon className="mr-2 h-4 w-4" /> {label}
+          </Button>
+        ))}
+      </div>
+
+      {mode === "voice" && (
+        <div className="mt-4 rounded-xl border border-border bg-card p-6 shadow-card">
+          <VoiceRecorder
+            language={form.language}
+            onLanguage={(l) => set("language", l)}
+            onTranscript={(orig, en) =>
+              appendText(orig === en ? orig : `${orig}\n(English: ${en})`, "Voice input")
+            }
+          />
+        </div>
+      )}
+      {mode === "camera" && (
+        <div className="mt-4 rounded-xl border border-border bg-card p-6 shadow-card">
+          <CameraCapture onExtract={(t) => appendText(t, "From photo")} />
+        </div>
+      )}
+      {mode === "file" && (
+        <p className="mt-4 text-sm text-muted-foreground">
+          Upload your specification file below — its text fills the description automatically.
+        </p>
+      )}
 
       <form
         onSubmit={handleSubmit}
@@ -250,6 +346,23 @@ function NewProcurement() {
           </Button>
         </div>
       </form>
+
+      <AlertDialog open={!!missing} onOpenChange={(o) => !o && setMissing(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Some specification details are missing</AlertDialogTitle>
+            <AlertDialogDescription>
+              The following are missing or too brief: {missing?.join(", ")}. What would you like to do?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setMissing(null)}>Fill details</Button>
+            <Button variant="outline" onClick={() => save("Withdrawn")}>Withdraw</Button>
+            <Button variant="destructive" onClick={() => save("Rejected")}>Reject</Button>
+            <Button onClick={() => save("In Progress")}>Accept &amp; analyze anyway</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

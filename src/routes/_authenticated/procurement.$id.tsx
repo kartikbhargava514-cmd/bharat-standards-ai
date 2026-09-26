@@ -1,3 +1,5 @@
+import { Check, X, Undo2 } from "lucide-react";
+import { SpeakButton } from "@/components/LanguageTools";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -62,6 +64,43 @@ const steps = [
 
 const filters = ["All", "Core", "Related", "Testing", "Safety"] as const;
 
+function ReviewActions({ id, status }: { id: string; status: string }) {
+  const queryClient = useQueryClient();
+  const review = useMutation({
+    mutationFn: async (next: "Accepted" | "Rejected" | "Withdrawn") => {
+      const note =
+        next === "Accepted" ? null : window.prompt(`Reason for marking ${next.toLowerCase()} (optional):`) ?? null;
+      const { error } = await supabase
+        .from("procurements")
+        .update({ status: next, review_note: note, reviewed_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+      return next;
+    },
+    onSuccess: async (next) => {
+      await queryClient.invalidateQueries({ queryKey: ["procurement", id] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success(`Report ${next.toLowerCase()}.`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not update."),
+  });
+  if (["Accepted", "Rejected", "Withdrawn"].includes(status))
+    return <span className="self-center text-sm font-semibold">Report {status}</span>;
+  return (
+    <>
+      <Button size="sm" disabled={review.isPending} onClick={() => review.mutate("Accepted")}>
+        <Check className="mr-2 h-4 w-4" /> Accept
+      </Button>
+      <Button size="sm" variant="destructive" disabled={review.isPending} onClick={() => review.mutate("Rejected")}>
+        <X className="mr-2 h-4 w-4" /> Reject
+      </Button>
+      <Button size="sm" variant="outline" disabled={review.isPending} onClick={() => review.mutate("Withdrawn")}>
+        <Undo2 className="mr-2 h-4 w-4" /> Withdraw
+      </Button>
+    </>
+  );
+}
+
 function ProcurementPage() {
   const { id } = Route.useParams();
   const queryClient = useQueryClient();
@@ -99,7 +138,7 @@ function ProcurementPage() {
   });
 
   const needsAnalysis =
-    !!data?.procurement && data.procurement.status !== "Completed" && data.recos.length === 0;
+    !!data?.procurement && !["Completed", "Accepted", "Rejected", "Withdrawn"].includes(data.procurement.status) && data.recos.length === 0;
 
   useEffect(() => {
     if (needsAnalysis && mutation.isIdle) mutation.mutate();
@@ -169,7 +208,9 @@ function ProcurementPage() {
         >
           <ArrowLeft className="h-4 w-4" /> Back to History
         </Link>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <ReviewActions id={id} status={p.status} />
+          <SpeakButton text={p.summary ?? p.description} />
           <Button variant="outline" size="sm" onClick={() => mutation.mutate()}>
             <RefreshCw className="mr-2 h-4 w-4" /> Re-analyze
           </Button>

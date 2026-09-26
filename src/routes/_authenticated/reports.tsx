@@ -25,7 +25,7 @@ function ReportsPage() {
       const { data } = await supabase
         .from("procurements")
         .select("id, title, category, created_at, summary")
-        .eq("status", "Completed")
+        .in("status", ["Completed", "Accepted", "Rejected"])
         .order("created_at", { ascending: false });
       return data ?? [];
     },
