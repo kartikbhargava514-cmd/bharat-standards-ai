@@ -15,9 +15,9 @@ export const speechToText = createServerFn({ method: "POST" })
     const text = await bhashiniAsr(data.audio, data.language);
     let english = text;
     if (text && data.language !== "en") {
-      [english] = await bhashiniTranslate([text], data.language, "en");
+      english = (await bhashiniTranslate([text], data.language, "en"))[0] ?? text;
     }
-    return { text, english: english ?? text };
+    return { text, english };
   });
 
 export const translateTexts = createServerFn({ method: "POST" })
@@ -48,7 +48,8 @@ export const textToSpeech = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     let text = data.text;
-    if (data.language !== "en") [text] = await bhashiniTranslate([text], "en", data.language);
+    if (data.language !== "en")
+      text = (await bhashiniTranslate([text], "en", data.language))[0] ?? data.text;
     const audio = await bhashiniTts(text ?? data.text, data.language);
     if (!audio) throw new Error("No audio returned. Please try again.");
     return { audio };
