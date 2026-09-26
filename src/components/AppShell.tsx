@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from "@/components/LanguageTools";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -159,6 +160,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               {initials}
             </div>
           </div>
+          <LanguageSwitcher />
         </header>
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </div>

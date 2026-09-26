@@ -1,3 +1,4 @@
+import { PenLine, FileUp, Mic, Camera } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { FileText, Layers, FileBarChart, ShieldCheck, ArrowRight } from "lucide-react";
@@ -7,6 +8,13 @@ import { useProfile } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const inputModes = [
+  { mode: "manual", label: "Manual Form", hint: "Fill title, description, quantity, unit and use.", icon: PenLine },
+  { mode: "file", label: "Text File Upload", hint: "Upload a .txt / .md / .csv specification.", icon: FileUp },
+  { mode: "voice", label: "Voice (Multilingual)", hint: "Speak in English or an Indian language.", icon: Mic },
+  { mode: "camera", label: "Camera Capture", hint: "Photograph a document or product.", icon: Camera },
+] as const;
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -81,6 +89,24 @@ function Dashboard() {
         <Button asChild>
           <Link to="/new-procurement">New Procurement</Link>
         </Button>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-5 shadow-card">
+        <h2 className="font-display text-base font-semibold">How would you like to enter your specification?</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {inputModes.map(({ mode, label, hint, icon: Icon }) => (
+            <Link
+              key={mode}
+              to="/new-procurement"
+              search={{ mode }}
+              className="rounded-lg border border-border p-4 transition-colors hover:border-primary hover:bg-accent"
+            >
+              <Icon className="h-6 w-6 text-primary" />
+              <p className="mt-3 font-semibold">{label}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+            </Link>
+          ))}
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
