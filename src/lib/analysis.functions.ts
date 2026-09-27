@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, Output } from "ai";
 import { z } from "zod";
+import { awaitAi } from "./ai-errors";
 
 const AnalysisSchema = z.object({
   product_category: z.string(),
@@ -87,8 +88,13 @@ export const analyzeProcurement = createServerFn({ method: "POST" })
       .filter(Boolean)
       .join("\n");
 
+    let streamError: unknown = null;
     const result = streamText({
       model: lovable.responses("openai/gpt-6-astra"),
+      maxRetries: 0,
+      onError: ({ error }) => {
+        streamError = error;
+      },
       output: Output.object({ schema: AnalysisSchema }),
       system: [
         "You are BharatStandAI, an assistant for Indian government procurement officials.",
@@ -114,7 +120,7 @@ export const analyzeProcurement = createServerFn({ method: "POST" })
       },
     });
 
-    const analysis = await result.output;
+    const analysis = await awaitAi(result.output, () => streamError);
 
     const byNumber = new Map((standards ?? []).map((s) => [s.is_number, s]));
 
