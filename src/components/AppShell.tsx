@@ -43,6 +43,10 @@ export function useProfile() {
         email: auth.user.email ?? "",
         full_name: data?.full_name ?? (auth.user.user_metadata?.["full_name"] as string) ?? "Officer",
         department: data?.department ?? "Procurement Dept.",
+        phone: data?.phone ?? null,
+        designation: data?.designation ?? null,
+        state: data?.state ?? null,
+        org_type: data?.org_type ?? null,
       };
     },
   });

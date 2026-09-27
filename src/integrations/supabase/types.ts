@@ -82,6 +82,9 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          org_type: string | null
+          phone: string | null
+          state: string | null
         }
         Insert: {
           created_at?: string
@@ -90,6 +93,9 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          org_type?: string | null
+          phone?: string | null
+          state?: string | null
         }
         Update: {
           created_at?: string
@@ -98,6 +104,9 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          org_type?: string | null
+          phone?: string | null
+          state?: string | null
         }
         Relationships: []
       }
