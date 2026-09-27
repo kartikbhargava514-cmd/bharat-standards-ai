@@ -89,6 +89,9 @@ function DomTranslator({ lang }: { lang: string }) {
       batch.forEach((b) => pending.delete(b));
       if (!batch.length) return;
       try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data: s } = await supabase.auth.getSession();
+        if (!s.session) return; // signed out: keep original text, no request
         const { translations } = await translate({ data: { texts: batch, target: lang } });
         if (cancelled) return;
         batch.forEach((b, i) => (cache[b] = translations[i] ?? b));
