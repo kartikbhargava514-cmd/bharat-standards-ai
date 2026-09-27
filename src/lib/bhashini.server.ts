@@ -75,8 +75,13 @@ export async function bhashiniTranslate(texts: string[], source: string, target:
     apiKey: apiKey(),
     headers: { "Lovable-API-Key": apiKey(), "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
   });
+  let streamError: unknown = null;
   const result = streamText({
     model: openai.responses(CHAT_MODEL),
+    maxRetries: 0,
+    onError: ({ error }) => {
+      streamError = error;
+    },
     system:
       "You are a translation engine. Translate each input line from the source language to the target language. " +
       "Return ONLY the translations, one per line, in the same order, with no numbering, quotes or commentary. " +
@@ -92,7 +97,14 @@ export async function bhashiniTranslate(texts: string[], source: string, target:
       },
     },
   });
-  const out = (await result.text).trim();
+  let out = "";
+  try {
+    out = (await result.text).trim();
+  } catch (e) {
+    console.error("Translation failed", streamError ?? e);
+    // Fall back to the original text so the app keeps working.
+    return texts;
+  }
   const lines = out.split("\n").map((l) => l.trim());
   return texts.map((t, i) => lines[i] || t);
 }
@@ -104,7 +116,8 @@ export async function bhashiniTts(text: string, _lang: string) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: TTS_MODEL,
-      contents: [{ parts: [{ text: `Say clearly and naturally: ${text}` }] }],
+      stream_format: "audio",
+      contents: [{ role: "user", parts: [{ text: `Say clearly and naturally: ${text}` }] }],
       generationConfig: {
         responseModalities: ["AUDIO"],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } },
