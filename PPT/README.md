@@ -1,1 +1,2 @@
 SIH presentation
+This presentation provides a comprehensive overview of our proposed solution for SIH Problem Statement 108. It highlights the identified problem, our proposed approach, key features, system design, technical implementation, feasibility, and expected impact. It also presents our prototype and explains how the solution aims to address the requirements of the problem statement through a practical and user-friendly approach.
