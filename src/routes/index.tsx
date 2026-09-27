@@ -62,7 +62,11 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [department, setDepartment] = useState("");
+  const [designation, setDesignation] = useState("");
+  const [state, setState] = useState("");
+  const [orgType, setOrgType] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -72,16 +76,26 @@ function AuthPage() {
     });
   }, [navigate]);
 
-  async function saveProfile(name?: string, dept?: string) {
+  async function saveProfile(details?: {
+    name: string;
+    phone: string;
+    department: string;
+    designation: string;
+    state: string;
+    orgType: string;
+  }) {
     const { data } = await supabase.auth.getUser();
     const user = data.user;
     if (!user) return;
     await supabase.from("profiles").upsert({
       id: user.id,
       email: user.email ?? null,
-      full_name: name ?? (user.user_metadata?.["full_name"] as string) ?? null,
-      department: dept ?? null,
-      designation: "Procurement Officer",
+      full_name: details?.name ?? (user.user_metadata?.["full_name"] as string) ?? null,
+      phone: details?.phone ?? null,
+      department: details?.department ?? null,
+      designation: details?.designation ?? null,
+      state: details?.state ?? null,
+      org_type: details?.orgType ?? null,
     });
   }
 
@@ -90,6 +104,11 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "register") {
+        if (!orgType || !state) {
+          toast.error("Please select your state and organisation type.");
+          setLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -99,7 +118,14 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        await saveProfile(fullName, department);
+        await saveProfile({
+          name: fullName.trim(),
+          phone: phone.trim(),
+          department: department.trim(),
+          designation: designation.trim(),
+          state,
+          orgType,
+        });
         toast.success("Account created. Welcome to BharatStandAI.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
