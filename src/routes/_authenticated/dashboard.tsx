@@ -1,5 +1,6 @@
 import { PenLine, FileUp, Mic, Camera } from "lucide-react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { AssistantChat } from "@/components/AssistantChat";
 import { useQuery } from "@tanstack/react-query";
 import { FileText, Layers, FileBarChart, ShieldCheck, ArrowRight } from "lucide-react";
 
@@ -17,6 +18,8 @@ const inputModes = [
 ] as const;
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  validateSearch: (search: Record<string, unknown>): { chat?: string } =>
+    typeof search["chat"] === "string" ? { chat: search["chat"] } : {},
   head: () => ({
     meta: [
       { title: "Dashboard — BharatStandAI" },
@@ -36,6 +39,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function Dashboard() {
   const { data: profile } = useProfile();
+  const { chat } = Route.useSearch();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard"],
@@ -107,6 +112,15 @@ function Dashboard() {
             </Link>
           ))}
         </div>
+      </div>
+
+      <div>
+        <h2 className="mb-3 font-display text-base font-semibold">Ask Mitra</h2>
+        <AssistantChat
+          threadId={chat ?? null}
+          onThreadChange={(id) => navigate({ to: "/dashboard", search: id ? { chat: id } : {} })}
+          suggestions={["How do I create a new procurement?", "How does voice input work?", "What does the relevance % mean?", "How do I accept or reject a report?"]}
+        />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

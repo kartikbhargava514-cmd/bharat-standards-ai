@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AssistantChat } from "@/components/AssistantChat";
 import { CategoryBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -18,7 +19,10 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/standards/")({
-  validateSearch: (search: Record<string, unknown>) => ({ q: String(search["q"] ?? "") }),
+  validateSearch: (search: Record<string, unknown>): { q: string; chat?: string } => ({
+    q: String(search["q"] ?? ""),
+    ...(typeof search["chat"] === "string" ? { chat: search["chat"] } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "Standards Search — BharatStandAI" },
@@ -36,7 +40,7 @@ export const Route = createFileRoute("/_authenticated/standards/")({
 const popular = ["steel", "electrical", "cement", "plastic", "medical equipment", "construction"];
 
 function StandardsSearch() {
-  const { q } = Route.useSearch();
+  const { q, chat } = Route.useSearch();
   const navigate = useNavigate();
   const [term, setTerm] = useState(q);
   const [category, setCategory] = useState("all");
@@ -166,6 +170,15 @@ function StandardsSearch() {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="mt-6">
+        <h2 className="mb-3 font-display text-base font-semibold">Ask Mitra about any standard</h2>
+        <AssistantChat
+          threadId={chat ?? null}
+          onThreadChange={(id) => navigate({ to: "/standards", search: id ? { q, chat: id } : { q } })}
+          suggestions={["Explain IS 277 in detail", "Why use IS 1786 for steel bars and not others?", "Which standards apply to PVC pipes?", "Where else can IS 269 cement be used?"]}
+        />
       </div>
 
       <div className="mt-6 space-y-3">

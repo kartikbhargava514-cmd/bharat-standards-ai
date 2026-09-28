@@ -111,16 +111,36 @@ function NewProcurement() {
       toast.error("File is too large. Please keep it under 2 MB.");
       return;
     }
+    let text = "";
     if (/\.(txt|md|csv)$/i.test(file.name)) {
-      const text = await file.text();
-      setForm((f) => ({
-        ...f,
-        description: `${f.description}\n\n--- From ${file.name} ---\n${text}`.trim().slice(0, 6000),
-      }));
-      toast.success("Specification text added from the document.");
+      text = await file.text();
+    } else if (/\.docx$/i.test(file.name)) {
+      try {
+        const mammoth = await import("mammoth");
+        const res = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+        text = res.value.replace(/\n{3,}/g, "\n\n").trim();
+      } catch {
+        toast.error("Could not read this Word file. It may be damaged or password-protected.");
+        return;
+      }
+    } else if (/\.doc$/i.test(file.name)) {
+      toast.info("Old .doc files can't be read. Please save it as .docx in Word and upload again.");
+      return;
     } else {
-      toast.info("For PDF or DOC files, paste the specification text into the description box.");
+      toast.info("For PDF files, paste the specification text into the description box.");
+      return;
     }
+    if (!text) {
+      toast.info("No text was found in this file.");
+      return;
+    }
+    const firstLine = text.split("\n").find((l) => l.trim())?.trim().slice(0, 80) ?? "";
+    setForm((f) => ({
+      ...f,
+      title: f.title || firstLine,
+      description: `${f.description}\n\n--- From ${file.name} ---\n${text}`.trim().slice(0, 6000),
+    }));
+    toast.success("Specification text added from the document.");
   }
 
   function appendText(text: string, label: string) {

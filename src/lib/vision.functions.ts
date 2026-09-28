@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createOpenAI } from "@ai-sdk/openai";
+import { CHAT_MODEL, openaiOptions, openaiProvider } from "./openai.server";
 import { streamText } from "ai";
 import { awaitAi } from "./ai-errors";
 import { z } from "zod";
@@ -16,16 +16,10 @@ export const extractFromImage = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("AI is not configured for this project.");
-    const lovable = createOpenAI({
-      baseURL: "https://ai.gateway.lovable.dev/v1",
-      apiKey,
-      headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
-    });
+    const lovable = openaiProvider();
     let streamError: unknown = null;
     const result = streamText({
-      model: lovable.responses("openai/gpt-6-astra"),
+      model: lovable.responses(CHAT_MODEL),
       maxRetries: 0,
       onError: ({ error }) => {
         streamError = error;
@@ -41,15 +35,7 @@ export const extractFromImage = createServerFn({ method: "POST" })
           ],
         },
       ],
-      providerOptions: {
-        openai: {
-          forceReasoning: true,
-          reasoningEffort: "low",
-          reasoningSummary: "auto",
-          store: false,
-          include: ["reasoning.encrypted_content"],
-        },
-      },
+      providerOptions: openaiOptions,
     });
     const text = await awaitAi(result.text, () => streamError);
     return { text: text.trim() };

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createOpenAI } from "@ai-sdk/openai";
+import { CHAT_MODEL, openaiOptions, openaiProvider } from "./openai.server";
 import { streamText, Output } from "ai";
 import { z } from "zod";
 import { awaitAi } from "./ai-errors";
@@ -38,8 +38,6 @@ export const analyzeProcurement = createServerFn({ method: "POST" })
     z.object({ procurementId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("AI is not configured for this project.");
 
     const { supabase, userId } = context;
 
@@ -70,14 +68,7 @@ export const analyzeProcurement = createServerFn({ method: "POST" })
       keywords: s.keywords,
     }));
 
-    const runtimeFetch = async (input: RequestInfo | URL, init?: RequestInit) => fetch(input, init);
-
-    const lovable = createOpenAI({
-      baseURL: "https://ai.gateway.lovable.dev/v1",
-      apiKey,
-      headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
-      fetch: runtimeFetch,
-    });
+    const lovable = openaiProvider();
 
     const input = [
       `Procurement title: ${procurement.title}`,
@@ -90,7 +81,7 @@ export const analyzeProcurement = createServerFn({ method: "POST" })
 
     let streamError: unknown = null;
     const result = streamText({
-      model: lovable.responses("openai/gpt-6-astra"),
+      model: lovable.responses(CHAT_MODEL),
       maxRetries: 0,
       onError: ({ error }) => {
         streamError = error;
@@ -109,15 +100,7 @@ export const analyzeProcurement = createServerFn({ method: "POST" })
         "Never claim legal determination; this assists the officer's review.",
       ].join(" "),
       prompt: `CATALOGUE OF AVAILABLE INDIAN STANDARDS (JSON):\n${JSON.stringify(catalogue)}\n\nPROCUREMENT INPUT:\n${input}`,
-      providerOptions: {
-        openai: {
-          forceReasoning: true,
-          reasoningEffort: "low",
-          reasoningSummary: "auto",
-          store: false,
-          include: ["reasoning.encrypted_content"],
-        },
-      },
+      providerOptions: openaiOptions,
     });
 
     const analysis = await awaitAi(result.output, () => streamError);
