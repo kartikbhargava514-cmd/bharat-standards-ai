@@ -226,6 +226,51 @@ export type Database = {
           },
         ]
       }
+      standard_relations: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          relation_type: string
+          source_id: string
+          target_id: string | null
+          target_is_number: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          relation_type: string
+          source_id: string
+          target_id?: string | null
+          target_is_number: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          relation_type?: string
+          source_id?: string
+          target_id?: string | null
+          target_is_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "standard_relations_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "standards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standard_relations_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "standards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       standards: {
         Row: {
           applicable_for: string | null
@@ -288,7 +333,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      standard_graph: {
+        Args: { _max_depth?: number; _root_ids: string[] }
+        Returns: {
+          depth: number
+          parent_id: string
+          path: string[]
+          relation_type: string
+          root_id: string
+          target_id: string
+          target_is_number: string
+          target_status: string
+          target_title: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
