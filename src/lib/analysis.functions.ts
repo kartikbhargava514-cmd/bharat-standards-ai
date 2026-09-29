@@ -145,6 +145,41 @@ export const analyzeProcurement = createServerFn({ method: "POST" })
         };
       });
 
+    // Traverse the normative-reference graph from primary (core) standards and
+    // surface allied standards that the AI did not already recommend.
+    const primaryIds = rows.filter((r) => /core/i.test(r.category)).map((r) => r.standard_id);
+    const roots = primaryIds.length ? primaryIds : rows.slice(0, 2).map((r) => r.standard_id);
+    if (roots.length) {
+      const { data: edges } = await supabase.rpc("standard_graph", { _root_ids: roots, _max_depth: 2 });
+      const catFor: Record<string, string> = {
+        normative_reference: "Normative Reference",
+        test_method: "Testing Standard",
+        safety_reference: "Safety Standard",
+        terminology: "Terminology Standard",
+        installation_reference: "Installation Standard",
+      };
+      const have = new Set(rows.map((r) => r.standard_id));
+      for (const e of edges ?? []) {
+        const cat = catFor[e.relation_type];
+        if (!cat || !e.target_id || have.has(e.target_id)) continue;
+        const std = (standards ?? []).find((s) => s.id === e.target_id);
+        if (!std) continue;
+        have.add(e.target_id);
+        const parent = (standards ?? []).find((s) => s.id === e.root_id);
+        rows.push({
+          procurement_id: procurement.id,
+          user_id: userId,
+          standard_id: std.id,
+          is_number: std.is_number,
+          title: std.title,
+          category: cat,
+          relevance: e.depth === 1 ? 60 : 45,
+          reason: `Allied standard referenced by primary standard ${parent?.is_number ?? ""} (${cat.toLowerCase()}).`,
+          evidence: std.scope,
+        });
+      }
+    }
+
     if (rows.length) {
       const { error: insertError } = await supabase.from("recommendations").insert(rows);
       if (insertError) throw insertError;

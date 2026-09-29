@@ -1,3 +1,4 @@
+import { ReferenceTree, useReferenceGraph } from "@/components/ReferenceGraph";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, BookOpen, Download, Gauge, ShieldCheck, Link2 } from "lucide-react";
@@ -109,6 +110,10 @@ function StandardDetail() {
           )}
         </Section>
 
+        <Section icon={Link2} title="Normative Reference Graph">
+          <GraphTree id={s.id} />
+        </Section>
+
         <Section icon={Link2} title="Related / Normative Standards">
           <div className="flex flex-wrap gap-2">
             {s.related_standards.length ? (
@@ -167,4 +172,10 @@ function Section({
       </div>
     </div>
   );
+}
+
+function GraphTree({ id }: { id: string }) {
+  const { data: edges = [], isLoading } = useReferenceGraph([id]);
+  if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  return <ReferenceTree rootId={id} edges={edges} />;
 }

@@ -29,6 +29,13 @@
       "when": 1790607802009,
       "tag": "0003_assistant_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790678867707,
+      "tag": "0004_standard_relations_graph",
+      "breakpoints": true
     }
   ]
 }

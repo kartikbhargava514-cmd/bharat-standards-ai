@@ -15,7 +15,7 @@
 - [ ] E2E test
 
 ## Normative Reference Graph
-- [ ] Replace OpenAI key (user)
-- [ ] standard_relations table (normative/informative/test_method/safety/terminology/installation/component/related_product/supersedes/replaced_by)
-- [ ] Server traversal of relations from recommended primary standards
-- [ ] Expandable tree/card view on recommendations + standard detail
+- [x] Replace OpenAI key (user)
+- [x] standard_relations table (normative/informative/test_method/safety/terminology/installation/component/related_product/supersedes/replaced_by)
+- [x] Server traversal of relations from recommended primary standards
+- [x] Expandable tree/card view on recommendations + standard detail
