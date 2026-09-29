@@ -109,6 +109,10 @@ function StandardDetail() {
           )}
         </Section>
 
+        <Section icon={Link2} title="Normative Reference Graph">
+          <GraphTree id={s.id} />
+        </Section>
+
         <Section icon={Link2} title="Related / Normative Standards">
           <div className="flex flex-wrap gap-2">
             {s.related_standards.length ? (

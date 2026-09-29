@@ -1,5 +1,6 @@
 import { Check, X, Undo2 } from "lucide-react";
 import { SpeakButton } from "@/components/LanguageTools";
+import { PrimaryReferenceCard, useReferenceGraph } from "@/components/ReferenceGraph";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -98,6 +99,34 @@ function ReviewActions({ id, status }: { id: string; status: string }) {
         <Undo2 className="mr-2 h-4 w-4" /> Withdraw
       </Button>
     </>
+  );
+}
+
+function GraphSection({
+  recos,
+}: {
+  recos: { standard_id: string | null; is_number: string; category: string }[];
+}) {
+  const primaries = recos.filter((r) => r.standard_id && /core/i.test(r.category));
+  const list = (primaries.length ? primaries : recos.filter((r) => r.standard_id).slice(0, 2)) as {
+    standard_id: string;
+    is_number: string;
+  }[];
+  const { data: edges = [] } = useReferenceGraph(list.map((r) => r.standard_id));
+  if (!list.length) return null;
+  return (
+    <section className="rounded-xl border border-border bg-card p-6 shadow-card">
+      <h2 className="font-display text-lg font-bold">Normative Reference Graph</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Allied standards linked to each primary standard (normative, test method, safety,
+        terminology, installation and more).
+      </p>
+      <div className="mt-4 space-y-3">
+        {list.map((r) => (
+          <PrimaryReferenceCard key={r.standard_id} rootId={r.standard_id} isNumber={r.is_number} edges={edges} />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -348,6 +377,8 @@ function ProcurementPage() {
           )}
         </div>
       </section>
+
+      <GraphSection recos={data.recos} />
 
       {/* Alerts */}
       {alerts.length > 0 && (
