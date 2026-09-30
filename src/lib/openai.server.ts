@@ -1,40 +1,41 @@
-// All AI features use the project owner's own OpenAI account (OPENAI_API_KEY).
-import { createOpenAI } from "@ai-sdk/openai";
+// All AI features use the project owner's own Google Gemini account (GEMINI_API_KEY).
+// (File name kept for import stability.)
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-export const CHAT_MODEL = "gpt-5-mini";
-export const STT_MODEL = "gpt-4o-mini-transcribe";
-export const TTS_MODEL = "gpt-4o-mini-tts";
+export const CHAT_MODEL = "gemini-2.5-flash";
+export const STT_MODEL = "gemini-2.5-flash";
+export const TTS_MODEL = "gemini-2.5-flash-preview-tts";
 
-export function openaiKey() {
-  const k = process.env["OPENAI_API_KEY"];
-  if (!k) throw new Error("OpenAI key is not configured.");
+export function geminiKey() {
+  const k = process.env["GEMINI_API_KEY"];
+  if (!k) throw new Error("Gemini key is not configured.");
   return k;
 }
 
+/** Returns an object exposing `.responses(model)` so existing call sites keep working. */
 export function openaiProvider() {
-  return createOpenAI({ apiKey: openaiKey() });
+  const google = createGoogleGenerativeAI({ apiKey: geminiKey() });
+  return { responses: (model: string) => google(model) };
 }
 
-export const openaiOptions = {
-  openai: { reasoningEffort: "low", store: false },
-} as const;
+export const openaiOptions = {} as const;
 
-export async function openaiFetch(path: string, init: RequestInit): Promise<Response> {
-  const res = await fetch(`https://api.openai.com/v1${path}`, {
-    ...init,
-    headers: { ...(init.headers ?? {}), Authorization: `Bearer ${openaiKey()}` },
-  });
+export async function geminiFetch(model: string, body: unknown): Promise<unknown> {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey() },
+      body: JSON.stringify(body),
+    },
+  );
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    console.error("OpenAI error", res.status, text.slice(0, 300));
-    if (res.status === 401) throw new Error("Your OpenAI key was rejected. Please update it.");
-    if (res.status === 429)
-      throw new Error(
-        /quota/i.test(text)
-          ? "Your OpenAI account has no credit left. Add billing at platform.openai.com."
-          : "OpenAI is busy right now. Please try again shortly.",
-      );
+    console.error("Gemini error", res.status, text.slice(0, 300));
+    if (res.status === 400 && /API key/i.test(text)) throw new Error("Your Gemini key was rejected. Please update it.");
+    if (res.status === 401 || res.status === 403) throw new Error("Your Gemini key was rejected. Please update it.");
+    if (res.status === 429) throw new Error("Gemini limit reached right now. Please try again shortly.");
     throw new Error(`Voice service error (${res.status}). Please try again.`);
   }
-  return res;
+  return res.json();
 }
