@@ -2,9 +2,9 @@
 // (File name kept for import stability.)
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-export const CHAT_MODEL = "gemini-2.5-flash";
-export const STT_MODEL = "gemini-2.5-flash";
-export const TTS_MODEL = "gemini-2.5-flash-preview-tts";
+export const CHAT_MODEL = "gemini-3.8-flash";
+export const STT_MODEL = "gemini-3.8-flash";
+export const TTS_MODEL = "gemini-3.8-flash-tts";
 
 export function geminiKey() {
   const k = process.env["GEMINI_API_KEY"];
