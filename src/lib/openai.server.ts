@@ -1,41 +1,32 @@
-// All AI features use the project owner's own Google Gemini account (GEMINI_API_KEY).
+// All text/vision AI features use the built-in Lovable AI Gateway (LOVABLE_API_KEY).
 // (File name kept for import stability.)
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
 
-export const CHAT_MODEL = "gemini-3.8-flash";
-export const STT_MODEL = "gemini-3.8-flash";
-export const TTS_MODEL = "gemini-3.8-flash-tts";
+const GATEWAY = "https://ai.gateway.lovable.dev/v1";
+export const CHAT_MODEL = "openai/gpt-6-astra";
 
-export function geminiKey() {
-  const k = process.env["GEMINI_API_KEY"];
-  if (!k) throw new Error("Gemini key is not configured.");
+function apiKey() {
+  const k = process.env["LOVABLE_API_KEY"];
+  if (!k) throw new Error("AI service is not configured.");
   return k;
 }
 
 /** Returns an object exposing `.responses(model)` so existing call sites keep working. */
 export function openaiProvider() {
-  const google = createGoogleGenerativeAI({ apiKey: geminiKey() });
-  return { responses: (model: string) => google(model) };
+  const openai = createOpenAI({
+    baseURL: GATEWAY,
+    apiKey: apiKey(),
+    headers: { "Lovable-API-Key": apiKey(), "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
+  });
+  return { responses: (model: string) => openai.responses(model) };
 }
 
-export const openaiOptions = {} as const;
-
-export async function geminiFetch(model: string, body: unknown): Promise<unknown> {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey() },
-      body: JSON.stringify(body),
-    },
-  );
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    console.error("Gemini error", res.status, text.slice(0, 300));
-    if (res.status === 400 && /API key/i.test(text)) throw new Error("Your Gemini key was rejected. Please update it.");
-    if (res.status === 401 || res.status === 403) throw new Error("Your Gemini key was rejected. Please update it.");
-    if (res.status === 429) throw new Error("Gemini limit reached right now. Please try again shortly.");
-    throw new Error(`Voice service error (${res.status}). Please try again.`);
-  }
-  return res.json();
-}
+export const openaiOptions = {
+  openai: {
+    forceReasoning: true,
+    reasoningEffort: "low",
+    reasoningSummary: "auto",
+    store: false,
+    include: ["reasoning.encrypted_content"],
+  },
+} as const;
