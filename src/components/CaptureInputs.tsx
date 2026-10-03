@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-const MAX_SECONDS = 45;
+const fmt = (s: number) =>
+  `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
 export function VoiceRecorder({
   language,
@@ -33,10 +34,6 @@ export function VoiceRecorder({
     const t = setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => clearInterval(t);
   }, [state]);
-
-  useEffect(() => {
-    if (state === "recording" && seconds >= MAX_SECONDS) void stop();
-  });
 
   async function start() {
     try {
@@ -101,9 +98,17 @@ export function VoiceRecorder({
             <Mic className="h-8 w-8" />
           )}
         </button>
+        {state === "recording" && (
+          <>
+            <p className="font-mono text-2xl font-bold tabular-nums">{fmt(seconds)}</p>
+            <Button type="button" variant="destructive" onClick={stop}>
+              <Square className="mr-2 h-4 w-4" /> Stop recording
+            </Button>
+          </>
+        )}
         <p className="text-sm text-muted-foreground">
           {state === "recording"
-            ? `Recording… ${seconds}s / ${MAX_SECONDS}s — tap to stop`
+            ? "Recording… speak as long as you need"
             : state === "processing"
               ? "Converting your speech to text…"
               : "Tap the microphone and describe what you need to procure"}

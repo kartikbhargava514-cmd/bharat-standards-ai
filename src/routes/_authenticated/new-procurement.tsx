@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { generateFormalTitle } from "@/lib/vision.functions";
 import { Loader2, Sparkles, Upload, PenLine, FileUp, Mic, Camera } from "lucide-react";
 import { VoiceRecorder, CameraCapture } from "@/components/CaptureInputs";
 import {
@@ -99,6 +101,8 @@ function NewProcurement() {
   });
   const [fileName, setFileName] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [titling, setTitling] = useState(false);
+  const makeTitle = useServerFn(generateFormalTitle);
 
   function set<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -147,8 +151,14 @@ function NewProcurement() {
     setForm((f) => ({
       ...f,
       description: `${f.description}\n\n--- ${label} ---\n${text}`.trim().slice(0, 6000),
-      title: f.title || text.split(/[.\n]/)[0]!.slice(0, 80),
     }));
+    if (!form.title.trim()) {
+      setTitling(true);
+      makeTitle({ data: { text } })
+        .then(({ title }) => setForm((f) => (f.title.trim() ? f : { ...f, title })))
+        .catch(() => toast.info("Could not suggest a title — please type one."))
+        .finally(() => setTitling(false));
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -253,7 +263,14 @@ function NewProcurement() {
         className="mt-6 space-y-5 rounded-xl border border-border bg-card p-6 shadow-card"
       >
         <div className="space-y-1.5">
-          <Label htmlFor="title">Procurement Title *</Label>
+          <Label htmlFor="title">
+            Procurement Title *{" "}
+            {titling && (
+              <span className="ml-2 inline-flex items-center text-xs font-normal text-muted-foreground">
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" /> Writing a formal title…
+              </span>
+            )}
+          </Label>
           <Input
             id="title"
             value={form.title}

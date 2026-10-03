@@ -40,3 +40,25 @@ export const extractFromImage = createServerFn({ method: "POST" })
     const text = await awaitAi(result.text, () => streamError);
     return { text: text.trim() };
   });
+
+export const generateFormalTitle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { text: string }) =>
+    z.object({ text: z.string().min(3).max(6000) }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    let streamError: unknown = null;
+    const result = streamText({
+      model: openaiProvider().responses(CHAT_MODEL),
+      maxRetries: 0,
+      onError: ({ error }) => {
+        streamError = error;
+      },
+      system:
+        "Write a formal government procurement title (in English, Title Case, 4-10 words, no quotes, no trailing period) for the item described. Example: 'Supply of Galvanized Corrugated Roofing Sheets for Government Warehouse'. Reply with the title only.",
+      prompt: data.text,
+      providerOptions: openaiOptions,
+    });
+    const title = await awaitAi(result.text, () => streamError);
+    return { title: title.trim().replace(/^["']|["'.]$/g, "").slice(0, 160) };
+  });

@@ -84,6 +84,7 @@ export type Database = {
           input_mode: string
           language: string | null
           quantity: string | null
+          ref_no: string
           review_note: string | null
           reviewed_at: string | null
           status: string
@@ -103,6 +104,7 @@ export type Database = {
           input_mode?: string
           language?: string | null
           quantity?: string | null
+          ref_no?: string
           review_note?: string | null
           reviewed_at?: string | null
           status?: string
@@ -122,6 +124,7 @@ export type Database = {
           input_mode?: string
           language?: string | null
           quantity?: string | null
+          ref_no?: string
           review_note?: string | null
           reviewed_at?: string | null
           status?: string
@@ -333,6 +336,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      next_procurement_ref: { Args: never; Returns: string }
       standard_graph: {
         Args: { _max_depth?: number; _root_ids: string[] }
         Returns: {
