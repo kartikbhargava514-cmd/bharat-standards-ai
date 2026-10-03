@@ -30,6 +30,20 @@ const AnalysisSchema = z.object({
     }),
   ),
   certification: z.string(),
+  report: z.object({
+    formal_title: z.string(),
+    procurement_type: z.string(),
+    item_name: z.string(),
+    delivery_location: z.string(),
+    delivery_period: z.string(),
+    service_environment: z.string(),
+    scope: z.array(z.string()),
+    approximate_dimensions: z.array(z.string()),
+    technical_specifications: z.array(
+      z.object({ heading: z.string(), text: z.string(), points: z.array(z.string()) }),
+    ),
+    dimensional_parameters: z.array(z.string()),
+  }),
 });
 
 export const analyzeProcurement = createServerFn({ method: "POST" })
@@ -97,6 +111,7 @@ export const analyzeProcurement = createServerFn({ method: "POST" })
         "reason: one sentence on why the standard applies to this procurement. evidence: quote the catalogue scope text that supports it.",
         "alerts: flag superseded/old editions, missing requirements, and safety considerations. level must be 'warning', 'info' or 'success'.",
         "certification: a short note on mandatory certification (BIS ISI mark, CRS registration, QCO, hallmarking) where applicable.",
+        "report: content for a formal Government Procurement Technical Specification Document. formal_title: a concise formal item title (e.g. 'Galvanized Corrugated Roofing Sheets'). procurement_type e.g. 'Supply of Technical Material'. item_name: singular item line. delivery_location/delivery_period: from input, else 'To be specified by the procuring authority'. service_environment: expected operating conditions. scope: 3-4 formal paragraphs using 'shall' language. approximate_dimensions: stated dimensions only, never invent numbers (empty if none). technical_specifications: 4-7 sub-sections (e.g. Material, Thickness, Coating, Surface Finish, Mechanical Properties, Corrosion Resistance) each with formal text and optional bullet points. dimensional_parameters: parameters to be checked.",
         "Never claim legal determination; this assists the officer's review.",
       ].join(" "),
       prompt: `CATALOGUE OF AVAILABLE INDIAN STANDARDS (JSON):\n${JSON.stringify(catalogue)}\n\nPROCUREMENT INPUT:\n${input}`,
@@ -118,6 +133,7 @@ export const analyzeProcurement = createServerFn({ method: "POST" })
           quantity: analysis.quantity,
           technical_requirements: analysis.technical_requirements,
           certification: analysis.certification,
+          report: analysis.report,
         },
         summary: analysis.summary,
         alerts: analysis.alerts,
