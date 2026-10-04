@@ -13,7 +13,7 @@ export type ReportContent = {
   technical_specifications?: Spec[];
   dimensional_parameters?: string[];
 };
-type Reco = { id: string; is_number: string; title: string; category: string; relevance: number; reason: string; evidence: string | null };
+type Reco = { id: string; is_number: string; title: string | null; category: string; relevance: number; reason: string | null; evidence: string | null };
 
 const groups: { n: string; label: string; test: RegExp }[] = [
   { n: "6.1", label: "Primary Product Standard", test: /core/i },
