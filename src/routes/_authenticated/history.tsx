@@ -24,7 +24,7 @@ function HistoryPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("procurements")
-        .select("id, title, category, status, created_at")
+        .select("id, ref_no, title, category, status, created_at")
         .order("created_at", { ascending: false });
       return data ?? [];
     },
@@ -49,7 +49,7 @@ function HistoryPage() {
             <table className="w-full text-sm">
               <thead className="bg-muted/60 text-left text-xs text-muted-foreground uppercase">
                 <tr>
-                  <th className="px-5 py-3 font-medium">#</th>
+                  <th className="px-5 py-3 font-medium">Ref. No.</th>
                   <th className="px-5 py-3 font-medium">Title</th>
                   <th className="px-5 py-3 font-medium">Category</th>
                   <th className="px-5 py-3 font-medium">Date</th>
@@ -58,9 +58,9 @@ function HistoryPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.map((p, i) => (
+                {data.map((p) => (
                   <tr key={p.id} className="border-t border-border hover:bg-muted/40">
-                    <td className="px-5 py-3 text-muted-foreground">{i + 1}</td>
+                    <td className="px-5 py-3 font-mono text-xs whitespace-nowrap">{p.ref_no}</td>
                     <td className="px-5 py-3 font-medium">{p.title}</td>
                     <td className="px-5 py-3 text-muted-foreground">{p.category ?? "—"}</td>
                     <td className="px-5 py-3 text-muted-foreground">

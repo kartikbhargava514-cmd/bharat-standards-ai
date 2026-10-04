@@ -1,6 +1,7 @@
 import { Check, X, Undo2 } from "lucide-react";
 import { SpeakButton } from "@/components/LanguageTools";
 import { PrimaryReferenceCard, useReferenceGraph } from "@/components/ReferenceGraph";
+import { ReportDocument, type ReportContent } from "@/components/ReportDocument";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -231,12 +232,15 @@ function ProcurementPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="no-print flex flex-wrap items-center justify-between gap-3">
-        <Link
-          to="/history"
-          className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to History
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/history"
+            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to History
+          </Link>
+          <span className="rounded bg-muted px-2 py-1 font-mono text-xs">{p.ref_no}</span>
+        </div>
         <div className="flex flex-wrap gap-2">
           <ReviewActions id={id} status={p.status} />
           <SpeakButton text={p.summary ?? p.description} />
@@ -408,79 +412,12 @@ function ProcurementPage() {
         </section>
       )}
 
-      {/* Report preview */}
-      <section className="rounded-xl border border-border bg-card p-8 shadow-card">
-        <div className="flex items-center gap-3 border-b border-border pb-4">
-          <FileText className="h-6 w-6 text-primary" />
-          <div>
-            <h2 className="font-display text-lg font-bold">Procurement Standards Report</h2>
-            <p className="text-xs text-muted-foreground">
-              AI Powered Indian Standards Recommendation — BharatStandAI
-            </p>
-          </div>
-        </div>
-
-        <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
-          <Row label="Procurement Title" value={p.title} />
-          <Row
-            label="Date"
-            value={new Date(p.created_at).toLocaleDateString("en-IN", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })}
-          />
-          <Row label="Category" value={req.product_category ?? p.category ?? "—"} />
-          <Row label="Quantity" value={`${p.quantity ?? "—"} ${p.unit ?? ""}`} />
-          <Row label="Prepared by" value={profile?.full_name ?? "—"} />
-          <Row label="Department" value={profile?.department ?? "—"} />
-        </dl>
-
-        <h3 className="mt-6 font-display text-base font-semibold">1. Executive Summary</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {p.summary ?? "Analysis summary will appear here after the AI review."}
-        </p>
-
-        <h3 className="mt-6 font-display text-base font-semibold">2. Recommended Standards</h3>
-        <div className="mt-2 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/60 text-left text-xs text-muted-foreground uppercase">
-              <tr>
-                <th className="px-3 py-2 font-medium">S.No</th>
-                <th className="px-3 py-2 font-medium">Standard No.</th>
-                <th className="px-3 py-2 font-medium">Title</th>
-                <th className="px-3 py-2 font-medium">Category</th>
-                <th className="px-3 py-2 font-medium">Relevance</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.recos.map((r, i) => (
-                <tr key={r.id} className="border-t border-border">
-                  <td className="px-3 py-2">{i + 1}</td>
-                  <td className="px-3 py-2 font-medium">{r.is_number}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.title}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{r.category}</td>
-                  <td className="px-3 py-2">{r.relevance}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <p className="mt-6 border-t border-border pt-4 text-xs text-muted-foreground">
-          This report assists the procurement official's review. It is not a legal determination of
-          applicability. Always verify the latest published edition with BIS.
-        </p>
-      </section>
-    </div>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex gap-2">
-      <dt className="w-40 shrink-0 text-muted-foreground">{label}</dt>
-      <dd className="font-medium">: {value}</dd>
+      <ReportDocument
+        p={p}
+        report={((p.structured_requirements ?? {}) as { report?: ReportContent }).report ?? {}}
+        recos={data.recos}
+        profile={profile}
+      />
     </div>
   );
 }

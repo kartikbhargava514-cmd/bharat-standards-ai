@@ -24,7 +24,7 @@ function ReportsPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("procurements")
-        .select("id, title, category, created_at, summary")
+        .select("id, ref_no, title, category, created_at, summary")
         .in("status", ["Completed", "Accepted", "Rejected"])
         .order("created_at", { ascending: false });
       return data ?? [];
@@ -50,6 +50,7 @@ function ReportsPage() {
               <div className="flex min-w-0 gap-3">
                 <FileBarChart className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                 <div className="min-w-0">
+                  <p className="font-mono text-xs text-muted-foreground">{p.ref_no}</p>
                   <p className="font-semibold">{p.title}</p>
                   <p className="line-clamp-2 text-sm text-muted-foreground">
                     {p.summary ?? p.category}
