@@ -46,7 +46,7 @@ export function ReportDocument({
   p: { ref_no: string; title: string; created_at: string; quantity: string | null; unit: string | null; application: string | null; category: string | null; status: string };
   report: ReportContent;
   recos: Reco[];
-  profile?: { full_name: string; department: string; org_type: string | null } | null;
+  profile?: { full_name: string; department: string; org_type: string | null } | null | undefined;
 }) {
   const title = report.formal_title || p.title;
   const qty = `${p.quantity ?? "—"} ${p.unit ?? ""}`.trim();
