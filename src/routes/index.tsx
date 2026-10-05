@@ -319,7 +319,7 @@ function AuthPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  minLength={6}
+                  minLength={8}
                   className="pr-10"
                 />
                 <button
