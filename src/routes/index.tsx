@@ -19,6 +19,9 @@ import logoAsset from "@/assets/logo.asset.json";
 
 const ORG_TYPES = ["Central Govt", "State Govt", "PSU", "Private", "Other"] as const;
 
+// Min 8 chars, at least one uppercase, one lowercase, one digit, one special character.
+const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat",
   "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh",
@@ -104,6 +107,13 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "register") {
+        if (!PASSWORD_RE.test(password)) {
+          toast.error(
+            "Password must be at least 8 characters with a capital letter, a small letter, a number and a special character.",
+          );
+          setLoading(false);
+          return;
+        }
         if (!orgType || !state) {
           toast.error("Please select your state and organisation type.");
           setLoading(false);
