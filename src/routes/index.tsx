@@ -331,6 +331,12 @@ function AuthPage() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {mode === "register" && (
+                <p className="text-xs text-muted-foreground">
+                  Minimum 8 characters, with a capital letter, a small letter, a number and a
+                  special character.
+                </p>
+              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
