@@ -19,6 +19,9 @@ import logoAsset from "@/assets/logo.asset.json";
 
 const ORG_TYPES = ["Central Govt", "State Govt", "PSU", "Private", "Other"] as const;
 
+// Min 8 chars, at least one uppercase, one lowercase, one digit, one special character.
+const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat",
   "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh",
@@ -104,6 +107,13 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "register") {
+        if (!PASSWORD_RE.test(password)) {
+          toast.error(
+            "Password must be at least 8 characters with a capital letter, a small letter, a number and a special character.",
+          );
+          setLoading(false);
+          return;
+        }
         if (!orgType || !state) {
           toast.error("Please select your state and organisation type.");
           setLoading(false);
@@ -309,7 +319,7 @@ function AuthPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  minLength={6}
+                  minLength={8}
                   className="pr-10"
                 />
                 <button
@@ -321,6 +331,12 @@ function AuthPage() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {mode === "register" && (
+                <p className="text-xs text-muted-foreground">
+                  Minimum 8 characters, with a capital letter, a small letter, a number and a
+                  special character.
+                </p>
+              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
